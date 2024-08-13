@@ -25,9 +25,11 @@ void loop() {
     if (mensagem.equals(botaoPressionado)) {
     	Serial.println("Recebido: botao foi pressionado");
     	Serial.println("A");
-		lcd.setCursor(0,0);
-		lcd.print("BOTAO ON");
-      	estadoBotao = HIGH;
+      lcd.setCursor(0,0);
+      lcd.print("BOTAO ON");
+      estadoBotao = HIGH;
+      delay(1000);
+      lcd.clear();
     } else if (mensagem == "BOTAO_SOLTO") {
       Serial.println("Recebido: Botão foi solto");
       estadoBotao = LOW;
