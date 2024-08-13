@@ -1,4 +1,4 @@
-// Arduíno 2 - Subsistema
+// Arduíno 2
 
 int caractere = 0;
 int pinoLed = 12;
@@ -35,7 +35,8 @@ void loop() {
       }
   }
   if (estadoBotao) {
-  	Serial.println("Botao pressionado");
+  	Serial.println("BOTAO_PRESSIONADO");
+    //Serial.println("");
     estadoBotao = false;
   }
 }
