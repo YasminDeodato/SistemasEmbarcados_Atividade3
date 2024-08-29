@@ -1,4 +1,3 @@
-
 // Arduino Base
 
 #include <LiquidCrystal_I2C.h>
@@ -9,16 +8,19 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);  // Endereço I2C do display, 16 colunas e 2
 int estadoBotao = LOW;
 int estadoLed = LOW;
 int estadoBuzzer = LOW;
+unsigned long inicioMed = 0;
 
 int estadoInterface = -1;
+int notificacoes = true;
 //int opcaoSelecionada = 0;
 const String botaoPressionado = "BOTAO_PRESSIONADO";
 
 void setup() {
   lcd.init();      // Inicializa o display
   lcd.backlight(); // Ativa a luz de fundo do display
-  Serial.begin(9600); // Inicializa a comunicação serial com o módulo-B
-  Serial1.begin(9600); // Inicializa a comunicação serial com o módulo-B
+  Serial.begin(9600); // Inicializa a comunicação Serial1 com o módulo-B
+  Serial2.begin(9600); // Inicializa a comunicação Serial1 com o módulo-B
+  Serial3.begin(9600); // Inicializa a comunicação Serial1 com o módulo-B
   Serial.println("Modulo-A pronto.");
 }
 
@@ -30,24 +32,22 @@ void menuInicial() {
   Serial.println(" (2) Desligar LED");
   Serial.println(" (3) Ligar Buzzer");
   Serial.println(" (4) Desligar Buzzer");
+  Serial.println(" (5) Desligar Notificacoes");
+  Serial.println(" (6) Ligar Notificacoes");
   Serial.println("---------------------------------------------");
 }
 
 void loop() {
+  if(millis() - inicioMed == 2000) {
+    lcd.clear();
+  }
   if (Serial.available()) {
     String opcao = Serial.readStringUntil('\n');
     enviarSelecaoParaSubsistema(opcao);
-
-    Serial.print("BUZZER ");
-    Serial.print(estadoBuzzer);
-    
-    Serial.print("| LED ");
-    Serial.print(estadoLed);
-    
   }
-  
-  if (Serial1.available()) { // Verifica se há dados recebidos
-    String message = Serial1.readStringUntil('\n'); // Lê a mensagem até a quebra de linha
+ 
+  if (Serial2.available()) { // Verifica se há dados recebidos
+    String message = Serial2.readStringUntil('\n'); // Lê a mensagem até a quebra de linha
     message.trim();
     handleSerialMessage(message); // Processa a mensagem recebida
   }
@@ -59,34 +59,56 @@ void handleSerialMessage(String message) {
    if (message.equals(botaoPressionado)) {
     Serial.println("Recebido: botao foi pressionado");
       lcd.setCursor(0,0);
-      lcd.print("BOTAO ON");
+      lcd.print("BOTAO ON ");
       estadoBotao = HIGH;
-      delay(1000);
-      lcd.clear();
+      inicioMed = millis();
     } else if (message == "BOTAO_SOLTO") {
       Serial.println("Recebido: Botão foi solto");
       estadoBotao = LOW;
+    } else {
+      Serial.println(message);
+      if (notificacoes) {
+        lcd.print(message);
+        lcd.print(" ");
+        inicioMed = millis();
+      }
     }
 }
 
 void enviarSelecaoParaSubsistema(String opcao) {
   if (opcao == "1") {
-    Serial1.println('A');
+    lcd.print("LED ON ");
+    inicioMed = millis();
+    Serial3.println("A");
     estadoLed = HIGH;
   }
 
    if (opcao == "2") {
-    Serial1.println("B");
+    lcd.print("LED OFF ");
+    inicioMed = millis();
+    Serial3.println("B");
     estadoLed = LOW;
   }
 
   if (opcao == "3") {
-    Serial1.println("C");
+    lcd.print("BUZZER ON ");
+    inicioMed = millis();
+    Serial3.println("C");
     estadoBuzzer = HIGH;
   }
 
    if (opcao == "4") {
-    Serial1.println("D");
+    lcd.print("BUZZER OFF ");
+    inicioMed = millis();
+    Serial3.println("D");
     estadoBuzzer = LOW;
+  }
+
+  if (opcao == "5") {
+    notificacoes = false;
+  }
+ 
+  if (opcao == "6") {
+    notificacoes = true;
   }
 }
