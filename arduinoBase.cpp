@@ -8,7 +8,6 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);  // Endereço I2C do display, 16 colunas e 2
 int estadoBotao = LOW;
 int estadoLed = LOW;
 int estadoBuzzer = LOW;
-unsigned long inicioMed = 0;
 
 int estadoInterface = -1;
 int notificacoes = true;
@@ -38,9 +37,6 @@ void menuInicial() {
 }
 
 void loop() {
-  if(millis() - inicioMed == 2000) {
-    lcd.clear();
-  }
   if (Serial.available()) {
     String opcao = Serial.readStringUntil('\n');
     enviarSelecaoParaSubsistema(opcao);
@@ -56,59 +52,59 @@ void loop() {
 
 void handleSerialMessage(String message) {
    Serial.println(message);
-   if (message.equals(botaoPressionado)) {
-    Serial.println("Recebido: botao foi pressionado");
+   if (message.equals(botaoPressionado) && notificacoes) {
+      Serial.println("Recebido: botao foi pressionado");
+      lcd.clear();
       lcd.setCursor(0,0);
-      lcd.print("BOTAO ON ");
+      lcd.print("BOTAO PRESSIONADO ");
       estadoBotao = HIGH;
-      inicioMed = millis();
-    } else if (message == "BOTAO_SOLTO") {
-      Serial.println("Recebido: Botão foi solto");
-      estadoBotao = LOW;
     } else {
       Serial.println(message);
-      if (notificacoes) {
-        lcd.print(message);
-        lcd.print(" ");
-        inicioMed = millis();
-      }
+      mostrarNotificacaoDisplay(message);
     }
+}
+
+void mostrarNotificacaoDisplay(String message) {
+  if (notificacoes) {
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print(message);
+    lcd.print(" ");
+  }
 }
 
 void enviarSelecaoParaSubsistema(String opcao) {
   if (opcao == "1") {
-    lcd.print("LED ON ");
-    inicioMed = millis();
+    mostrarNotificacaoDisplay("LED ON ");
     Serial3.println("A");
     estadoLed = HIGH;
   }
 
    if (opcao == "2") {
-    lcd.print("LED OFF ");
-    inicioMed = millis();
+    mostrarNotificacaoDisplay("LED OFF ");
     Serial3.println("B");
     estadoLed = LOW;
   }
 
   if (opcao == "3") {
-    lcd.print("BUZZER ON ");
-    inicioMed = millis();
+    mostrarNotificacaoDisplay("BUZZER ON ");
     Serial3.println("C");
     estadoBuzzer = HIGH;
   }
 
    if (opcao == "4") {
-    lcd.print("BUZZER OFF ");
-    inicioMed = millis();
+    mostrarNotificacaoDisplay("BUZZER OFF ");
     Serial3.println("D");
     estadoBuzzer = LOW;
   }
 
   if (opcao == "5") {
+    Serial.println("Notificacoes Display desligadas");
     notificacoes = false;
   }
  
   if (opcao == "6") {
+    Serial.println("Notificacoes Display ligadas");
     notificacoes = true;
   }
 }
