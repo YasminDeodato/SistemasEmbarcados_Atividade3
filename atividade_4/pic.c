@@ -73,9 +73,10 @@ void init() {
     //ADCON1  = 0x0E;               // configura os pinos do PORTB como digitais, e RA0 (PORTA) como analógico
     ADCON1 = 0x0f;                  // configura todos os pinos como I/O
     TRISA = 0;                      // define porta como saida
-    PORTA = 0;                      // resseta todos os pinos do porta
+    PORTA = 0;                      // reseta todos os pinos do porta
     TRISD = 0;                      // define portd como saida
     PORTD = 0;                      // seta todos os pinos do portd
+    TRISC.RC1 = 0;                  // PORT C configurado como saída - Buzzer
 
     Lcd_Init();                     // inicializa módulo LCD
     Lcd_Cmd(_LCD_CURSOR_OFF);       // apaga cursor
@@ -116,6 +117,11 @@ void main(){
                 }
                 if (ucRead == 'P'){      // recebe valor potenciometro
                     int duty = UART1_Read();
+                    if (duty > 200) {
+                        PORTC.RC1 = 1;  // liga buzzer
+                    } else {
+                        PORTC.RC1 = 0;  // desliga buzzer
+                    }
                     lcd_out(1,1,"DUTY");
                     sprintf(numero_str, "%d", duty);
                     lcd_out(2, 10, numero_str);
