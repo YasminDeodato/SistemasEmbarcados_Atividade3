@@ -78,7 +78,7 @@ void main(){
     PORTA = 0;                      // reseta todos os pinos do porta
     TRISD = 0;                      // define portd como saida
     PORTD = 0;                      // seta todos os pinos do portd
-    //TRISC.RC1 = 0;                  // PORT C configurado como saída - Buzzer
+    TRISC.RC1 = 0;                  // PORT C configurado como saída - Buzzer
 
     Lcd_Init();                     // inicializa módulo LCD
     Lcd_Cmd(_LCD_CURSOR_OFF);       // apaga cursor
@@ -90,13 +90,13 @@ void main(){
     UART1_Init(9600);               // comunicacao UART
 
     while(1) {
-        //display7Seg(contador);        // mostra valor atual do contador no display 7seg
+        display7Seg(contador);        // mostra valor atual do contador no display 7seg
         PWM1_Set_Duty(duty);          // envia valor duty para ventoinha
 
         if (Control == 1){           // O PIC (Control = 1) recebe um caracter do Arduino e responde com outro caracter.
             if(UART1_Data_Ready()){   // verifica se um dado foi recebido no buffer
                 ucRead = UART1_Read();   // lê o dado recebido do buffer.
-               /* if (ucRead == 'D'){      // decrementa contador
+                if (ucRead == 'D'){      // decrementa contador
                     if (contador > 0) {
                        contador--;
                     }
@@ -113,14 +113,14 @@ void main(){
                     lcd_out(2, 1, "INCREM.");
                     sprintf(numero_str, "%d", contador);
                     lcd_out(2, 10, numero_str);
-                }  */
-                //if (ucRead == 'P'){      // recebe valor potenciometro
+                }
+                if (ucRead == 'P'){      // recebe valor potenciometro
                     duty = UART1_Read();
-                    /*if (duty > 200) {
+                    if (duty > 200) {
                         PORTC.RC1 = 0;  // liga buzzer
                     } else {
                         PORTC.RC1 = 1;  // desliga buzzer
-                    }   */
+                    }
                     //if (duty != dutyAnterior) {
                     Lcd_Cmd(_LCD_CLEAR);
                     lcd_out(1, 1, "DUTY");
@@ -128,7 +128,7 @@ void main(){
                     lcd_out(2, 1, numero_str);
                     //dutyAnterior = duty;
                     //}
-                //}
+                }
             }
         }
    }
