@@ -23,6 +23,8 @@ int unidade = 0;
 int dezena = 0;
 int centena = 0;
 int milhar = 0;
+int duty = 0;
+//int dutyAnterior = 0;
 
 // mapeamento dos segmentos para os números de 0 a 9
 const char segmentos[10] = {
@@ -57,76 +59,76 @@ void display7Seg(int valor) {
     PORTA.RA3 = 0;
 
     // display 3 - dezena
-    PORTA.RA4 = 1; 
-    PORTD = segmentos[dezena]; 
-    Delay_ms(1); 
+    PORTA.RA4 = 1;
+    PORTD = segmentos[dezena];
+    Delay_ms(1);
     PORTA.RA4 = 0;
 
     // display 4 - unidade
     PORTA.RA5 = 1;
-    PORTD = segmentos[unidade]; 
+    PORTD = segmentos[unidade];
     Delay_ms(1);
     PORTA.RA5 = 0;
 }
 
-void init() {
+void main(){
     //ADCON1  = 0x0E;               // configura os pinos do PORTB como digitais, e RA0 (PORTA) como analógico
     ADCON1 = 0x0f;                  // configura todos os pinos como I/O
     TRISA = 0;                      // define porta como saida
     PORTA = 0;                      // reseta todos os pinos do porta
     TRISD = 0;                      // define portd como saida
     PORTD = 0;                      // seta todos os pinos do portd
-    TRISC.RC1 = 0;                  // PORT C configurado como saída - Buzzer
+    //TRISC.RC1 = 0;                  // PORT C configurado como saída - Buzzer
 
     Lcd_Init();                     // inicializa módulo LCD
     Lcd_Cmd(_LCD_CURSOR_OFF);       // apaga cursor
     Lcd_Cmd(_LCD_CLEAR);            // limpa display
-    
+
     PWM1_Init(5000);                // inicializa módulo PWM com 5Khz
     PWM1_Start();                   // start PWM
 
     UART1_Init(9600);               // comunicacao UART
-}
-
-void main(){
-    init();
 
     while(1) {
-        display7Seg(contador);        // mostra valor atual do contador no display 7seg
+        //display7Seg(contador);        // mostra valor atual do contador no display 7seg
         PWM1_Set_Duty(duty);          // envia valor duty para ventoinha
 
         if (Control == 1){           // O PIC (Control = 1) recebe um caracter do Arduino e responde com outro caracter.
             if(UART1_Data_Ready()){   // verifica se um dado foi recebido no buffer
                 ucRead = UART1_Read();   // lê o dado recebido do buffer.
-                Delay_ms(50);            // Pausa de 50ms.
-                if (ucRead == 'D'){      // decrementa contador
+               /* if (ucRead == 'D'){      // decrementa contador
                     if (contador > 0) {
-                    contador--;
+                       contador--;
                     }
-                    lcd_out(1, 1, "PIC Receive/Send");
+                    Lcd_Cmd(_LCD_CLEAR);
+                    lcd_out(1, 1, "PIC Receive");
                     lcd_out(2, 1, "DECREM.");
                     sprintf(numero_str, "%d", contador);
                     lcd_out(2, 10, numero_str);
                 }
                 if (ucRead == 'I'){      // incrementa contador
                     contador++;
-                    lcd_out(1, 1, "PIC Receive/Send");
+                    Lcd_Cmd(_LCD_CLEAR);
+                    lcd_out(1, 1, "PIC Receive");
                     lcd_out(2, 1, "INCREM.");
                     sprintf(numero_str, "%d", contador);
                     lcd_out(2, 10, numero_str);
-                }
-                if (ucRead == 'P'){      // recebe valor potenciometro
-                    int duty = UART1_Read();
-                    if (duty > 200) {
-                        PORTC.RC1 = 1;  // liga buzzer
+                }  */
+                //if (ucRead == 'P'){      // recebe valor potenciometro
+                    duty = UART1_Read();
+                    /*if (duty > 200) {
+                        PORTC.RC1 = 0;  // liga buzzer
                     } else {
-                        PORTC.RC1 = 0;  // desliga buzzer
-                    }
-                    lcd_out(1,1,"DUTY");
+                        PORTC.RC1 = 1;  // desliga buzzer
+                    }   */
+                    //if (duty != dutyAnterior) {
+                    Lcd_Cmd(_LCD_CLEAR);
+                    lcd_out(1, 1, "DUTY");
                     sprintf(numero_str, "%d", duty);
-                    lcd_out(2, 10, numero_str);
-                }
-                UART1_Write('P');
+                    lcd_out(2, 1, numero_str);
+                    //dutyAnterior = duty;
+                    //}
+                //}
             }
         }
    }
